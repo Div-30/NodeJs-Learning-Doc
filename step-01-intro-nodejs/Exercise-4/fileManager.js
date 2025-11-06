@@ -14,7 +14,7 @@ const readFile = (fileName, callback) => {
 
 const writeFile = (fileName, data, callback) => {
   const filePath = path.join(__dirname, fileName);
-  fs.writeFile(filePath, data, (error) => {
+  fs.writeFile(filePath, data, { flag: "a" }, (error) => {
     if (error) {
       return callback(error);
     }
