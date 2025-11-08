@@ -2,7 +2,7 @@ const http = require("http");
 const fs = require("fs");
 
 const server = http.createServer((req, res) => {
-  let path = "./step-02-http-server/views";
+  let path = "./step-02-http-server/views/";
   let statusCode = 200;
   switch (req.url) {
     case "/":
