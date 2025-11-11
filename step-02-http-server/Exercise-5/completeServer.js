@@ -1,6 +1,6 @@
-const http = require("http");
-const fs = require("fs");
-const url = require("url");
+const http = require("node:http");
+const fs = require("node:fs");
+const url = require("node:url");
 
 function handleFileRoute(pathname, res) {
   const routes = {
@@ -12,7 +12,7 @@ function handleFileRoute(pathname, res) {
   if (!filename) {
     return false;
   }
-  const path = `./step-02-http-server/views/${filename}`;
+  const path = `./views/${filename}`;
   res.writeHead(200, { "Content-Type": "text/html" });
   const readStream = fs.createReadStream(path, { encoding: "utf-8" });
   readStream.pipe(res);
@@ -99,3 +99,47 @@ function handleApiProducts(res) {
   res.writeHead(200, { "Content-Type": "application/json" });
   res.end(JSON.stringify(products, null, 2));
 }
+
+function handle404(pathname, res) {
+  console.log(`404 - Route not found:${pathname}`);
+  res.writeHead(404, { "Content-Type": "text/html" });
+  res.end(`
+    <h1>404 - Page not found</h1>
+    <p>The route ${pathname} does not exist</p>
+    <p></p>
+    `);
+}
+
+const server = http.createServer((req, res) => {
+  try {
+    const parseurl = url.parse(req.url, true);
+    const pathname = parseurl.pathname;
+    const query = parseurl.query;
+    if (pathname === "/api/products") {
+      handleApiProducts(res);
+    } else if (pathname === "/greet") {
+      handleGreetRoute(query, res);
+    } else if (pathname === "/search") {
+      handleSearchRoute(query, res);
+    } else if (handleFileRoute(pathname, res)) {
+    } else {
+      handle404(pathname, res);
+    }
+  } catch (error) {
+    console.error("Server Error: ", error);
+    if (!res.headersSent) {
+      res.writeHead(500, { "Content-Type": "text/html" });
+      req.end(`
+        <h1>500 - Internal Server Error</h1>
+        <p>Something went wrong on the server.</p>
+        <p><a href="/">Go to Home</a></p>
+        `);
+    }
+  }
+});
+
+server.listen(3000, "localhost", () => {
+  console.log("===========================================");
+  console.log("Complete Server running at http://localhost:3000/");
+  console.log("===========================================");
+});
